@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -21,5 +22,9 @@ public class GlobalExceptionHandler {
         String errorMessages = exception.getBindingResult().getFieldErrors().stream().map(error ->
                 error.getDefaultMessage()).collect(Collectors.joining(",\n"));
         return ResponseEntity.badRequest().body(errorMessages);
+    }
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<?> handleException(NoSuchElementException exception) {
+        return ResponseEntity.badRequest().body(exception.getMessage());
     }
 }
