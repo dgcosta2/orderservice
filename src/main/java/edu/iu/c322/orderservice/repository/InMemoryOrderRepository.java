@@ -21,7 +21,6 @@ public class InMemoryOrderRepository {
         int orderId = orders.size() + 1;
         order.setId(orderId);
 //        order.setReturnRequests(new ArrayList<>());
-        order.setStatus("active");
         int itemId = 1;
         for (Item item : order.getItems()) {
             item.setId(itemId++);
@@ -33,7 +32,6 @@ public class InMemoryOrderRepository {
     public void delete(int orderId) {
         Order o = getByOrderId(orderId);
         if (o != null) {
-            o.setStatus("cancelled");
         } else {
             throw new IllegalStateException("Order id is not valid.");
         }

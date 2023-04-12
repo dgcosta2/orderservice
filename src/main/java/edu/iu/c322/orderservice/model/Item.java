@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity

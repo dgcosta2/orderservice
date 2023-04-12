@@ -3,12 +3,15 @@ package edu.iu.c322.orderservice.controller;
 import edu.iu.c322.orderservice.model.Item;
 import edu.iu.c322.orderservice.model.Order;
 import edu.iu.c322.orderservice.model.ReturnRequest;
+import edu.iu.c322.orderservice.model.UpdateRequest;
 import edu.iu.c322.orderservice.repository.AddressRepository;
 import edu.iu.c322.orderservice.repository.ItemRepository;
 import edu.iu.c322.orderservice.repository.OrderRepository;
 import edu.iu.c322.orderservice.repository.ReturnRequestRepository;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,23 +20,23 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
-    /*
-     * Needs a table for Orders, Items, Payment, Address, Return Requests
-     */
 
     private OrderRepository orderRepository;
     private ItemRepository itemRepository;
     private AddressRepository addressRepository;
     private ReturnRequestRepository returnRequestRepository;
+    private final WebClient trackingService;
 
     public OrderController(OrderRepository orderRepository,
                            ItemRepository itemRepository,
                            AddressRepository addressRepository,
-                           ReturnRequestRepository returnRequestRepository) {
+                           ReturnRequestRepository returnRequestRepository,
+                           WebClient.Builder webClientBuilder) {
         this.orderRepository = orderRepository;
         this.itemRepository = itemRepository;
         this.addressRepository = addressRepository;
         this.returnRequestRepository = returnRequestRepository;
+        this.trackingService = webClientBuilder.baseUrl("http://localhost:8084").build();
     }
 
     @GetMapping("/{id}")
@@ -58,7 +61,18 @@ public class OrderController {
         }
         order.setOrderPlaced(LocalDate.now());
         Order o = orderRepository.save(order);
+        addTrackings(o);
         return o.getId();
+    }
+
+    private void addTrackings (Order o) {
+        for (int i = 0; i < o.getItems().size(); i++) {
+            trackingService.put()
+                    .uri("/trackings/{orderId}", o.getId())
+                    .body(Mono.just(new UpdateRequest(o.getItems().get(i).getId(), "ordered.")), UpdateRequest.class)
+                    .retrieve()
+                    .bodyToMono(Void.class);
+        }
     }
 
     @PutMapping("/return")
@@ -68,9 +82,9 @@ public class OrderController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable int id) {
-        Optional<Order> order = orderRepository.findById(id);
-        order.ifPresent(value -> value.setStatus("cancelled"));
-        orderRepository.save(order.get());
+        Order order = new Order();
+        order.setId(id);
+        orderRepository.delete(order);
     }
 
     @DeleteMapping

@@ -30,7 +30,6 @@ public class Order {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "payment_id")
     private Payment payment;
-    private String status;
     private LocalDate orderPlaced;
 
     public LocalDate getOrderPlaced() {
@@ -39,14 +38,6 @@ public class Order {
 
     public void setOrderPlaced(LocalDate orderPlaced) {
         this.orderPlaced = orderPlaced;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public int getId() {
@@ -102,11 +93,11 @@ public class Order {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Order order = (Order) o;
-        return id == order.id && customerId == order.customerId && Double.compare(order.total, total) == 0 && shippingAddress.equals(order.shippingAddress) && items.equals(order.items) && payment.equals(order.payment) && status.equals(order.status) && orderPlaced.equals(order.orderPlaced);
+        return id == order.id && customerId == order.customerId && Double.compare(order.total, total) == 0 && shippingAddress.equals(order.shippingAddress) && items.equals(order.items) && payment.equals(order.payment) && orderPlaced.equals(order.orderPlaced);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, customerId, total, shippingAddress, items, payment, status, orderPlaced);
+        return Objects.hash(id, customerId, total, shippingAddress, items, payment, orderPlaced);
     }
 }
