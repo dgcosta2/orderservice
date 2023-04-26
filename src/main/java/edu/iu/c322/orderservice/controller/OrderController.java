@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
@@ -39,6 +40,7 @@ public class OrderController {
         this.trackingService = webClientBuilder.baseUrl("http://localhost:8084").build();
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/{id}")
     public List<Order> findByCustomerId(@PathVariable int id) {
         return orderRepository.findByCustomerId(id);
@@ -48,6 +50,7 @@ public class OrderController {
     public Order findByOrderId(@PathVariable int id) {
         return orderRepository.findById(id).orElseThrow();
     }
+
 
     @GetMapping
     public List<Order> findAll() {
@@ -69,7 +72,7 @@ public class OrderController {
         for (int i = 0; i < o.getItems().size(); i++) {
             trackingService.put()
                     .uri("/trackings/{orderId}", o.getId())
-                    .body(Mono.just(new UpdateRequest(o.getItems().get(i).getId(), "ordered.")), UpdateRequest.class)
+                    .body(Mono.just(new UpdateRequest(o.getItems().get(i).getId(), "ordered")), UpdateRequest.class)
                     .retrieve()
                     .bodyToMono(Void.class);
         }
@@ -82,8 +85,8 @@ public class OrderController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable int id) {
-        Order order = new Order();
-        order.setId(id);
+        Order order = orderRepository.findById(id).get();
+        //delete each item inside this order
         orderRepository.delete(order);
     }
 
